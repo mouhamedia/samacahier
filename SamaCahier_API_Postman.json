@@ -1,0 +1,558 @@
+{
+  "info": {
+    "name": "SamaCahier API",
+    "description": "API REST de gestion des crédits - Boutiquiers et Clients",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 AUTHENTIFICATION",
+      "item": [
+        {
+          "name": "1️⃣ Inscription (Créer un utilisateur)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"boutiquier1\",\n  \"email\": \"boutiquier1@example.com\",\n  \"password\": \"password123456\",\n  \"password_confirm\": \"password123456\",\n  \"first_name\": \"Moussa\",\n  \"last_name\": \"Diallo\",\n  \"phone\": \"+223 XX XXX XXXX\",\n  \"role\": \"boutiquier\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", ""]
+            }
+          }
+        },
+        {
+          "name": "2️⃣ Se connecter (Obtenir le Token JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users/token/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", "token", ""]
+            }
+          }
+        },
+        {
+          "name": "3️⃣ Rafraîchir le Token JWT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh\": \"YOUR_REFRESH_TOKEN_HERE\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users/token/refresh/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", "token", "refresh", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 UTILISATEURS",
+      "item": [
+        {
+          "name": "1️⃣ Lister les utilisateurs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/users/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", ""]
+            }
+          }
+        },
+        {
+          "name": "2️⃣ Récupérer l'utilisateur connecté",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/users/me/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", "me", ""]
+            }
+          }
+        },
+        {
+          "name": "3️⃣ Récupérer un utilisateur par ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/users/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "4️⃣ Modifier un utilisateur",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newemail@example.com\",\n  \"first_name\": \"NewName\",\n  \"phone\": \"+223 XX XXX XXXX\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "5️⃣ Changer le mot de passe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"old_password\": \"admin123456\",\n  \"new_password\": \"newpassword123456\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/users/change_password/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "users", "change_password", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👥 CLIENTS (Réservé aux Boutiquiers)",
+      "item": [
+        {
+          "name": "1️⃣ Lister mes clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/clients/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "clients", ""]
+            }
+          }
+        },
+        {
+          "name": "2️⃣ Créer un client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mamadou Traoré\",\n  \"phone\": \"+223 XX XXX XXXX\",\n  \"email\": \"mamadou@example.com\",\n  \"address\": \"Bamako, Mali\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/clients/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "clients", ""]
+            }
+          }
+        },
+        {
+          "name": "3️⃣ Récupérer un client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/clients/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "clients", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "4️⃣ Modifier un client",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mamadou Traoré Updated\",\n  \"phone\": \"+223 XX XXX YYYY\",\n  \"email\": \"updated@example.com\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/clients/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "clients", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "5️⃣ Supprimer un client",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/clients/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "clients", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "6️⃣ Tous mes clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/clients/my_clients/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "clients", "my_clients", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 CRÉDITS (Réservé aux Boutiquiers)",
+      "item": [
+        {
+          "name": "1️⃣ Lister mes crédits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", ""]
+            }
+          }
+        },
+        {
+          "name": "2️⃣ Créer un crédit pour un client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client\": 1,\n  \"amount\": 50000.00,\n  \"description\": \"Riz et millet\",\n  \"due_date\": \"2025-12-15\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", ""]
+            }
+          }
+        },
+        {
+          "name": "3️⃣ Récupérer un crédit",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "4️⃣ Modifier un crédit",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client\": 1,\n  \"amount\": 75000.00,\n  \"description\": \"Riz, millet et sucre\",\n  \"due_date\": \"2025-12-20\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "5️⃣ Supprimer un crédit",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/1/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", "1", ""]
+            }
+          }
+        },
+        {
+          "name": "6️⃣ Ajouter un paiement à un crédit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 25000.00,\n  \"payment_method\": \"cash\",\n  \"note\": \"Paiement partiel\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/1/add_payment/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", "1", "add_payment", ""]
+            }
+          }
+        },
+        {
+          "name": "7️⃣ Statistiques des crédits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/credits/credits/stats/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "credits", "stats", ""]
+            }
+          }
+        },
+        {
+          "name": "8️⃣ Lister les paiements",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/credits/payments/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "credits", "payments", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 DASHBOARD",
+      "item": [
+        {
+          "name": "1️⃣ Tableau de bord Boutiquier",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/dashboard/boutiquier/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "dashboard", "boutiquier", ""]
+            }
+          }
+        },
+        {
+          "name": "2️⃣ Tableau de bord Client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_ACCESS_TOKEN"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8000/api/dashboard/client/",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["api", "dashboard", "client", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

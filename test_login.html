@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Connexion Boutiquier</title>
+    <script src="https://unpkg.com/axios@1.6.0/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial; margin: 50px; }
+        .form-group { margin: 15px 0; }
+        input { padding: 8px; width: 250px; }
+        button { padding: 8px 20px; background: blue; color: white; cursor: pointer; }
+        .result { margin-top: 20px; padding: 15px; border: 1px solid #ccc; }
+        .success { background: #efe; color: green; }
+        .error { background: #fee; color: red; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Connexion</h1>
+    
+    <div class="form-group">
+        <label>Utilisateur:</label><br>
+        <input type="text" id="username" value="pole45@gmail.com">
+    </div>
+    
+    <div class="form-group">
+        <label>Mot de passe:</label><br>
+        <input type="password" id="password" value="temp_pole45@gmail.com_3">
+    </div>
+    
+    <button onclick="login()">Tester Connexion</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function login() {
+            const resultDiv = document.getElementById('result');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await axios.post('http://localhost:8000/api/users/token/', {
+                    username: username,
+                    password: password
+                });
+                
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <h3>✅ Connexion Réussie!</h3>
+                    <p><strong>Access Token:</strong> ${response.data.access.substring(0, 50)}...</p>
+                    <p><strong>Rôle:</strong> ${response.data.role}</p>
+                    <p><strong>Username:</strong> ${response.data.username}</p>
+                `;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Erreur de Connexion</h3>
+                    <p>${error.response?.data?.detail || error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
