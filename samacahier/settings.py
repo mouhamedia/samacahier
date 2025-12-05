@@ -19,7 +19,7 @@ SECRET_KEY = APP_CONFIG['SECRET_KEY']
 
 DEBUG = APP_CONFIG['DEBUG']
 
-ALLOWED_HOSTS = APP_CONFIG['ALLOWED_HOSTS']
+ALLOWED_HOSTS = APP_CONFIG['ALLOWED_HOSTS'] + ['testserver']
 
 # Application definition
 INSTALLED_APPS = [
@@ -74,9 +74,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'samacahier.wsgi.application'
 
-# Database
+# Database - PostgreSQL
 DATABASES = {
-    'default': DATABASE if DATABASE['ENGINE'] == 'django.db.backends.sqlite3' else {
+    'default': {
         'ENGINE': DATABASE['ENGINE'],
         'NAME': DATABASE['NAME'],
         'USER': DATABASE['USER'],
@@ -130,7 +130,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',  # ← FIXÉ: Permettre l'accès public par défaut
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',

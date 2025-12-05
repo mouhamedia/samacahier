@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SamaCahier - Espace Client</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios@1.6.0/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* LOGIN */
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            margin: 50px auto;
+        }
+
+        .login-container h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+        }
+
+        /* DASHBOARD */
+        .dashboard-header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dashboard-header h1 {
+            color: #667eea;
+            font-size: 1.8em;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .btn-logout {
+            background: #dc3545;
+            padding: 8px 15px;
+            margin-top: 10px;
+            width: auto;
+        }
+
+        /* CARDS */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .card-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .card-label {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        /* TABLES */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .table-container h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .status.active {
+            background: #efe;
+            color: #3c3;
+        }
+
+        .status.inactive {
+            background: #fee;
+            color: #c33;
+        }
+
+        .status.pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 30px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            width: auto;
+            margin-right: 5px;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <!-- LOGIN PAGE -->
+        <div v-if="!isAuthenticated" class="login-container">
+            <h1>🏪 SamaCahier</h1>
+            <h2 style="color: #666; font-size: 1.2em; margin-bottom: 30px;">Espace Client</h2>
+            
+            <div v-if="error" class="alert alert-error">{{ error }}</div>
+            
+            <div class="form-group">
+                <label>Code d'Accès Client</label>
+                <input 
+                    v-model="loginForm.access_code" 
+                    type="text" 
+                    placeholder="Ex: ABC-DE-001"
+                    @keyup.enter="clientLogin"
+                />
+            </div>
+            
+            <button @click="clientLogin" class="btn" :disabled="loading">
+                {{ loading ? '⏳ Connexion...' : '🔓 Se Connecter' }}
+            </button>
+
+            <p style="margin-top: 20px; color: #999;">
+                Vous êtes un boutique ? <br>
+                <a href="/frontend/" style="color: #667eea; text-decoration: none;">Aller au dashboard</a>
+            </p>
+        </div>
+
+        <!-- CLIENT DASHBOARD -->
+        <div v-if="isAuthenticated">
+            <!-- HEADER -->
+            <div class="dashboard-header">
+                <div>
+                    <h1>👋 Bienvenue, {{ clientName }}</h1>
+                    <p style="color: #999;">Espace Client - Gestion des Crédits</p>
+                </div>
+                <div class="user-info">
+                    <p><strong>Client:</strong> {{ clientName }}</p>
+                    <p><strong>Boutiquiers:</strong> {{ clientBoutiquier }}</p>
+                    <button @click="logout" class="btn btn-logout">🚪 Déconnexion</button>
+                </div>
+            </div>
+
+            <!-- STATS CARDS -->
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>💰 Montant Total Emprunté</h3>
+                    <div class="card-value">{{ formatCurrency(totalBorrowed) }}</div>
+                    <div class="card-label">XOF</div>
+                </div>
+                
+                <div class="card">
+                    <h3>✅ Montant Remboursé</h3>
+                    <div class="card-value">{{ formatCurrency(totalPaid) }}</div>
+                    <div class="card-label">XOF</div>
+                </div>
+                
+                <div class="card">
+                    <h3>⚠️ Montant Restant</h3>
+                    <div class="card-value" style="color: #dc3545;">{{ formatCurrency(totalRemaining) }}</div>
+                    <div class="card-label">XOF À REMBOURSER</div>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Crédits Actifs</h3>
+                    <div class="card-value">{{ activeCredits }}</div>
+                    <div class="card-label">en cours</div>
+                </div>
+            </div>
+
+            <!-- MES CRÉDITS -->
+            <div class="table-container">
+                <h2>📋 Mes Crédits</h2>
+                
+                <div v-if="loading" class="loading">⏳ Chargement...</div>
+                
+                <div v-else-if="credits.length === 0" class="empty-state">
+                    ✅ Aucun crédit à rembourser !
+                </div>
+
+                <div v-else style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Montant</th>
+                                <th>Remboursé</th>
+                                <th>Restant</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="credit in credits" :key="credit.id">
+                                <td><strong>{{ credit.product }}</strong></td>
+                                <td>{{ formatCurrency(credit.amount) }}</td>
+                                <td>{{ formatCurrency(credit.paid_amount) }}</td>
+                                <td><strong style="color: #dc3545;">{{ formatCurrency(credit.amount - credit.paid_amount) }}</strong></td>
+                                <td>
+                                    <span :class="['status', credit.status]">
+                                        {{ credit.status === 'active' ? '✅ Actif' : '❌ Remboursé' }}
+                                    </span>
+                                </td>
+                                <td>{{ formatDate(credit.created_at) }}</td>
+                                <td>
+                                    <button 
+                                        v-if="credit.amount > credit.paid_amount"
+                                        @click="showPaymentModal(credit)" 
+                                        class="btn-small btn-success"
+                                    >
+                                        💳 Rembourser
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- HISTORIQUE TRANSACTIONS -->
+            <div class="table-container">
+                <h2>📜 Historique Transactions</h2>
+                
+                <div v-if="loadingHistory" class="loading">⏳ Chargement...</div>
+                
+                <div v-else-if="transactions.length === 0" class="empty-state">
+                    Aucune transaction pour le moment
+                </div>
+
+                <div v-else style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Montant</th>
+                                <th>Solde</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="transaction in transactions" :key="transaction.id">
+                                <td>{{ formatDate(transaction.date) }}</td>
+                                <td>
+                                    <span :class="['status', transaction.type]">
+                                        {{ transaction.type === 'credit' ? '📥 Crédit' : '📤 Paiement' }}
+                                    </span>
+                                </td>
+                                <td>{{ transaction.description }}</td>
+                                <td :style="{ color: transaction.type === 'credit' ? '#dc3545' : '#28a745' }">
+                                    {{ transaction.type === 'credit' ? '+' : '-' }}{{ formatCurrency(transaction.amount) }}
+                                </td>
+                                <td>{{ formatCurrency(transaction.balance) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODAL PAIEMENT -->
+            <div v-if="showPayment" style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            ">
+                <div style="
+                    background: white;
+                    border-radius: 15px;
+                    padding: 30px;
+                    max-width: 500px;
+                    width: 90%;
+                ">
+                    <h2 style="color: #667eea; margin-bottom: 20px;">💳 Effectuer un Paiement</h2>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>Crédit:</strong> {{ selectedCredit.product }}<br>
+                        <strong>Montant du Crédit:</strong> {{ formatCurrency(selectedCredit.amount) }}<br>
+                        <strong>Montant Restant:</strong> {{ formatCurrency(selectedCredit.amount - selectedCredit.paid_amount) }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Montant à Rembourser (XOF)</label>
+                        <input 
+                            v-model.number="paymentAmount" 
+                            type="number" 
+                            placeholder="Entrez le montant"
+                        />
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button @click="processPayment" class="btn btn-success" style="flex: 1;">
+                            ✅ Confirmer
+                        </button>
+                        <button @click="showPayment = false" class="btn btn-secondary" style="flex: 1; background: #999;">
+                            ❌ Annuler
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    isAuthenticated: false,
+                    loading: false,
+                    loadingHistory: false,
+                    error: '',
+                    loginForm: { access_code: '' },
+                    accessToken: '',
+                    clientName: '',
+                    clientBoutiquier: '',
+                    clientAccessCode: '',
+                    credits: [],
+                    transactions: [],
+                    totalBorrowed: 0,
+                    totalPaid: 0,
+                    totalRemaining: 0,
+                    activeCredits: 0,
+                    showPayment: false,
+                    selectedCredit: {},
+                    paymentAmount: 0
+                };
+            },
+
+            methods: {
+                async clientLogin() {
+                    if (!this.loginForm.access_code.trim()) {
+                        this.error = 'Veuillez entrer votre code d\'accès';
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.error = '';
+
+                    try {
+                        const response = await axios.post(
+                            'http://localhost:8000/api/clients/access/',
+                            { access_code: this.loginForm.access_code.toUpperCase() }
+                        );
+
+                        this.accessToken = response.data.access;
+                        this.clientName = response.data.client_name;
+                        this.clientBoutiquier = response.data.boutiquier_name;
+                        this.clientAccessCode = this.loginForm.access_code;
+                        this.isAuthenticated = true;
+
+                        localStorage.setItem('clientToken', this.accessToken);
+                        localStorage.setItem('clientAccessCode', this.loginForm.access_code);
+
+                        this.loadCredits();
+                        this.loadTransactions();
+
+                    } catch (error) {
+                        this.error = error.response?.data?.error || 'Code d\'accès invalide';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadCredits() {
+                    this.loading = true;
+                    try {
+                        const response = await axios.get(
+                            'http://localhost:8000/api/clients/my-credits/',
+                            { headers: { Authorization: `Bearer ${this.accessToken}` } }
+                        );
+
+                        this.credits = response.data;
+                        this.calculateStats();
+
+                    } catch (error) {
+                        console.error('Erreur chargement crédits:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async loadTransactions() {
+                    this.loadingHistory = true;
+                    try {
+                        const response = await axios.get(
+                            'http://localhost:8000/api/clients/transactions/',
+                            { headers: { Authorization: `Bearer ${this.accessToken}` } }
+                        );
+
+                        this.transactions = response.data;
+
+                    } catch (error) {
+                        console.error('Erreur chargement transactions:', error);
+                        this.transactions = [];
+                    } finally {
+                        this.loadingHistory = false;
+                    }
+                },
+
+                calculateStats() {
+                    this.totalBorrowed = 0;
+                    this.totalPaid = 0;
+                    this.activeCredits = 0;
+
+                    this.credits.forEach(credit => {
+                        this.totalBorrowed += parseFloat(credit.amount);
+                        this.totalPaid += parseFloat(credit.paid_amount);
+                        if (credit.status === 'active') {
+                            this.activeCredits++;
+                        }
+                    });
+
+                    this.totalRemaining = this.totalBorrowed - this.totalPaid;
+                },
+
+                showPaymentModal(credit) {
+                    this.selectedCredit = credit;
+                    this.paymentAmount = 0;
+                    this.showPayment = true;
+                },
+
+                async processPayment() {
+                    if (this.paymentAmount <= 0) {
+                        alert('Veuillez entrer un montant valide');
+                        return;
+                    }
+
+                    if (this.paymentAmount > (this.selectedCredit.amount - this.selectedCredit.paid_amount)) {
+                        alert('Le montant dépasse le solde restant');
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        await axios.post(
+                            `http://localhost:8000/api/credits/${this.selectedCredit.id}/pay/`,
+                            { amount: this.paymentAmount },
+                            { headers: { Authorization: `Bearer ${this.accessToken}` } }
+                        );
+
+                        alert('✅ Paiement enregistré avec succès !');
+                        this.showPayment = false;
+                        this.loadCredits();
+                        this.loadTransactions();
+
+                    } catch (error) {
+                        alert('❌ Erreur: ' + (error.response?.data?.error || error.message));
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                logout() {
+                    this.isAuthenticated = false;
+                    this.accessToken = '';
+                    this.credits = [];
+                    this.transactions = [];
+                    this.loginForm = { access_code: '' };
+                    localStorage.removeItem('clientToken');
+                    localStorage.removeItem('clientAccessCode');
+                },
+
+                formatCurrency(value) {
+                    return new Intl.NumberFormat('fr-FR', {
+                        style: 'currency',
+                        currency: 'XOF'
+                    }).format(value || 0);
+                },
+
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+            },
+
+            mounted() {
+                // Récupérer le token stocké
+                const storedToken = localStorage.getItem('clientToken');
+                if (storedToken) {
+                    this.accessToken = storedToken;
+                    this.clientAccessCode = localStorage.getItem('clientAccessCode');
+                    this.isAuthenticated = true;
+                    this.loadCredits();
+                    this.loadTransactions();
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

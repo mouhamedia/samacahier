@@ -7,8 +7,112 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from credits.models import Credit
 from decimal import Decimal
+import secrets
+import string
 
 User = get_user_model()
+
+
+def generate_temp_password():
+    """Génère un mot de passe temporaire sécurisé"""
+    chars = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    return ''.join(secrets.choice(chars) for _ in range(12))
+
+class IsSuperUser:
+    """Permission pour vérifier si c'est un admin"""
+    def has_permission(self, request, view):
+        return request.user and request.user.is_superuser
+
+
+# ============ ADMIN - CRÉER UN BOUTIQUIER ============
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_boutiquier(request):
+    """
+    POST /api/admin/boutiquiers/create/
+    Créer un nouveau boutiquier avec mot de passe temporaire
+    
+    Body:
+    {
+        "username": "boutiquier_nom",
+        "email": "boutiquier@example.com",
+        "first_name": "Nom",
+        "last_name": "Prénom",
+        "phone": "+221770000000"
+    }
+    """
+    if not request.user.is_superuser:
+        return Response(
+            {'error': 'Permission refusée - Admin seulement'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    username = request.data.get('username', '').strip()
+    email = request.data.get('email', '').strip()
+    first_name = request.data.get('first_name', '').strip()
+    last_name = request.data.get('last_name', '').strip()
+    phone = request.data.get('phone', '').strip()
+    
+    # Validation
+    if not username or not email:
+        return Response(
+            {'error': 'Username et email requis'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if User.objects.filter(username=username).exists():
+        return Response(
+            {'error': f'Username "{username}" déjà utilisé'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    if User.objects.filter(email=email).exists():
+        return Response(
+            {'error': f'Email "{email}" déjà utilisé'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Générer mot de passe temporaire
+    temp_password = generate_temp_password()
+    
+    # Créer le boutiquier
+    try:
+        boutiquier = User.objects.create_user(
+            username=username,
+            email=email,
+            password=temp_password,  # ← Hashé automatiquement par create_user
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            role='boutiquier',
+            status='active',
+            is_active=True  # ← IMPORTANT: Actif immédiatement
+        )
+        
+        return Response({
+            'success': True,
+            'message': f'Boutiquier créé avec succès',
+            'boutiquier': {
+                'id': boutiquier.id,
+                'username': boutiquier.username,
+                'email': boutiquier.email,
+                'first_name': boutiquier.first_name,
+                'last_name': boutiquier.last_name,
+                'phone': boutiquier.phone,
+                'role': boutiquier.role,
+                'status': boutiquier.status,
+                'is_active': boutiquier.is_active,
+                'temp_password': temp_password,  # ← À communiquer au boutiquier
+            }
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Erreur création: {str(e)}'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
 
 class IsSuperUser:
     """Permission pour vérifier si c'est un admin"""

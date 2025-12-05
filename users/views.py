@@ -1,10 +1,11 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from .serializers import (
     UserSerializer, 
     UserCreateSerializer, 
@@ -15,9 +16,44 @@ from .permissions import IsOwner
 User = get_user_model()
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    """Endpoint de connexion personnalisé - Login simplifié"""
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    if not username or not password:
+        return Response(
+            {'error': 'Username et password requis'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    user = authenticate(username=username, password=password)
+    
+    if not user:
+        return Response(
+            {'error': 'Identifiants invalides'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
+    # Générer les tokens
+    refresh = RefreshToken.for_user(user)
+    
+    return Response({
+        'access': str(refresh.access_token),
+        'refresh': str(refresh),
+        'username': user.username,
+        'email': user.email,
+        'role': user.role,
+    }, status=status.HTTP_200_OK)
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Vue JWT personnalisée."""
     serializer_class = CustomTokenObtainPairSerializer
+    permission_classes = [AllowAny]  # ← FIXÉ: Permettre l'accès public
+    permission_classes = [AllowAny]  # ← FIXÉ: Permettre l'accès sans authentification
 
 
 class UserViewSet(viewsets.ModelViewSet):
