@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: samacahier-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
+    startCommand: gunicorn samacahier.wsgi --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13"
+      - key: DEBUG
+        value: "False"
+
+databases:
+  - name: samacahier-db
+    databaseName: samacahier
+    region: oregon
