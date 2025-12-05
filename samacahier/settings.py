@@ -7,24 +7,28 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Charger le fichier .env
+# --------------------------
+# Charger le fichier .env local (optionnel)
+# --------------------------
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --------------------------
-# APPLICATION CONFIG (.env)
+# APPLICATION CONFIGURATION
 # --------------------------
-
 SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = os.getenv("DEBUG", "False") == "True"
+if not SECRET_KEY:
+    raise ValueError("Le paramètre SECRET_KEY ne doit pas être vide !")
 
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
+
+# Convertir la liste d'hôtes autorisés depuis .env
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",") + ["testserver"]
 
 # --------------------------
 # APPLICATION DEFINITION
 # --------------------------
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -32,13 +36,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     # Third party apps
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
-    
+
     # Local apps
     'users.apps.UsersConfig',
     'clients.apps.ClientsConfig',
@@ -78,28 +82,32 @@ TEMPLATES = [
 WSGI_APPLICATION = 'samacahier.wsgi.application'
 
 # --------------------------
-# DATABASE (PostgreSQL)
+# DATABASE CONFIGURATION
 # --------------------------
+DB_ENGINE = os.getenv("DB_ENGINE", "django.db.backends.sqlite3")
 
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv("DB_ENGINE"),
-        'NAME': os.getenv("DB_NAME"),
-        'USER': os.getenv("DB_USER"),
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': os.getenv("DB_HOST"),
-        'PORT': os.getenv("DB_PORT"),
+if DB_ENGINE == "django.db.backends.sqlite3":
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": BASE_DIR / os.getenv("DB_NAME", "db.sqlite3"),
+        }
     }
-}
-
-# Fallback SQLite mode
-if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
-    DATABASES['default']['NAME'] = BASE_DIR / 'db.sqlite3'
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": DB_ENGINE,
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
+        }
+    }
 
 # --------------------------
 # PASSWORD VALIDATION
 # --------------------------
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -110,7 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # --------------------------
 # INTERNATIONALIZATION
 # --------------------------
-
 LANGUAGE_CODE = os.getenv("LANGUAGE_CODE", "fr-fr")
 TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
 USE_I18N = True
@@ -119,7 +126,6 @@ USE_TZ = True
 # --------------------------
 # STATIC & MEDIA FILES
 # --------------------------
-
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -132,7 +138,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # --------------------------
 # DJANGO REST FRAMEWORK
 # --------------------------
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -152,7 +157,6 @@ REST_FRAMEWORK = {
 # --------------------------
 # JWT CONFIGURATION
 # --------------------------
-
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME", 60))),
     'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME", 1440))),
@@ -163,13 +167,9 @@ SIMPLE_JWT = {
 # --------------------------
 # CORS SETTINGS
 # --------------------------
-
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 
 # --------------------------
 # CUSTOM USER MODEL
 # --------------------------
-
 AUTH_USER_MODEL = 'users.CustomUser'
-
-
