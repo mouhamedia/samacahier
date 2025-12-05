@@ -1,22 +1,18 @@
 """
-app.py - Flask wrapper for Django WSGI application
-This allows Render's default 'gunicorn app:app' to work with Django
+app.py - Django WSGI application
+This exposes the Django application as 'app' for gunicorn
+Render's default command: gunicorn app:app
 """
 
 import os
-import sys
 import django
-from pathlib import Path
 
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'samacahier.settings')
 django.setup()
 
-# Import Django WSGI application
+# Import and export Django WSGI application
 from django.core.wsgi import get_wsgi_application
 
-# Create the WSGI application
+# This is what gunicorn will use
 app = get_wsgi_application()
-
-if __name__ == '__main__':
-    app.run()
