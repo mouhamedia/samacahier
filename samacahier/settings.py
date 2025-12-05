@@ -5,23 +5,26 @@ Django settings for SamaCahier project.
 import os
 from pathlib import Path
 from datetime import timedelta
-from config.env import (
-    DATABASE,
-    JWT_CONFIG,
-    CORS_CONFIG,
-    APP_CONFIG,
-    EMAIL_CONFIG,
-)
+from dotenv import load_dotenv
+
+# Charger le fichier .env
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = APP_CONFIG['SECRET_KEY']
+# --------------------------
+# APPLICATION CONFIG (.env)
+# --------------------------
 
-DEBUG = APP_CONFIG['DEBUG']
+SECRET_KEY = os.getenv("SECRET_KEY")
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = APP_CONFIG['ALLOWED_HOSTS'] + ['testserver']
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",") + ["testserver"]
 
-# Application definition
+# --------------------------
+# APPLICATION DEFINITION
+# --------------------------
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -74,63 +77,68 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'samacahier.wsgi.application'
 
-# Database - PostgreSQL
+# --------------------------
+# DATABASE (PostgreSQL)
+# --------------------------
+
 DATABASES = {
     'default': {
-        'ENGINE': DATABASE['ENGINE'],
-        'NAME': DATABASE['NAME'],
-        'USER': DATABASE['USER'],
-        'PASSWORD': DATABASE['PASSWORD'],
-        'HOST': DATABASE['HOST'],
-        'PORT': DATABASE['PORT'],
+        'ENGINE': os.getenv("DB_ENGINE"),
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': os.getenv("DB_HOST"),
+        'PORT': os.getenv("DB_PORT"),
     }
 }
 
-# Si SQLite, utiliser le chemin par défaut
+# Fallback SQLite mode
 if DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
     DATABASES['default']['NAME'] = BASE_DIR / 'db.sqlite3'
 
-# Password validation
+# --------------------------
+# PASSWORD VALIDATION
+# --------------------------
+
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
-LANGUAGE_CODE = APP_CONFIG['LANGUAGE_CODE']
-TIME_ZONE = APP_CONFIG['TIME_ZONE']
+# --------------------------
+# INTERNATIONALIZATION
+# --------------------------
+
+LANGUAGE_CODE = os.getenv("LANGUAGE_CODE", "fr-fr")
+TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# --------------------------
+# STATIC & MEDIA FILES
+# --------------------------
+
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Django REST Framework
+# --------------------------
+# DJANGO REST FRAMEWORK
+# --------------------------
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',  # ← FIXÉ: Permettre l'accès public par défaut
+        'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -141,28 +149,27 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
 }
 
-# JWT
+# --------------------------
+# JWT CONFIGURATION
+# --------------------------
+
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=JWT_CONFIG['ACCESS_TOKEN_LIFETIME_MINUTES']),
-    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=JWT_CONFIG['REFRESH_TOKEN_LIFETIME_MINUTES']),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
-    'UPDATE_LAST_LOGIN': False,
-    'ALGORITHM': JWT_CONFIG['ALGORITHM'],
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME", 60))),
+    'REFRESH_TOKEN_LIFETIME': timedelta(minutes=int(os.getenv("JWT_REFRESH_TOKEN_LIFETIME", 1440))),
+    'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
-    'JTI_CLAIM': 'jti',
-    'TOKEN_TYPE_CLAIM': 'token_type',
-    'JTI_IN_BLACKLIST_CLAIM': 'blacklist',
-    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
 }
 
-# CORS
-CORS_ALLOWED_ORIGINS = CORS_CONFIG['ALLOWED_ORIGINS']
+# --------------------------
+# CORS SETTINGS
+# --------------------------
 
-# Custom user model
+CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+
+# --------------------------
+# CUSTOM USER MODEL
+# --------------------------
+
 AUTH_USER_MODEL = 'users.CustomUser'
+
+
